@@ -12,7 +12,11 @@
     "lint": "eslint src --ext .ts",
     "test": "jest",
     "pack": "electron-builder --dir",
-    "dist": "electron-builder"
+    "dist": "electron-builder",
+    "dist:win": "electron-builder --win",
+    "dist:mac": "electron-builder --mac",
+    "dist:linux": "electron-builder --linux",
+    "build:msi": "node scripts/build-msi.js"
   },
   "author": "",
   "license": "MIT",
@@ -44,31 +48,64 @@
     "asarUnpack": [
       "native/pdfium/build/Release/*"
     ],
+    "extraResources": [
+      {
+        "from": "native/pdfium/build/Release/",
+        "to": "native-addon",
+        "filter": ["*.node", "*.dll", "*.so", "*.dylib"]
+      }
+    ],
     "win": {
       "target": [
-        "nsis",
-        "msi"
+        {
+          "target": "nsis",
+          "arch": ["x64"]
+        }
       ],
-      "icon": "assets/icon.ico"
+      "icon": "assets/icon.ico",
+      "signtoolOptions": {
+        "publisherName": "PDF Editor"
+      }
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "perMachine": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "PDF Editor",
+      "uninstallDisplayName": "PDF Editor"
     },
     "mac": {
       "target": [
-        "dmg"
+        {
+          "target": "dmg",
+          "arch": ["x64", "arm64"]
+        }
       ],
       "icon": "assets/icon.icns",
       "hardenedRuntime": true,
-      "gatekeeperAssess": false
+      "gatekeeperAssess": false,
+      "entitlements": "build/entitlements.mac.plist",
+      "entitlementsInherit": "build/entitlements.mac.plist",
+      "category": "public.app-category.productivity"
+    },
+    "dmg": {
+      "contents": [
+        { "x": 130, "y": 220 },
+        { "x": 410, "y": 220, "type": "link", "path": "/Applications" }
+      ]
     },
     "linux": {
       "target": [
-        "AppImage"
+        {
+          "target": "AppImage",
+          "arch": ["x64"]
+        }
       ],
-      "icon": "assets/icon.png"
+      "icon": "assets/icon.png",
+      "category": "Office"
     },
-    "publish": {
-      "provider": "github",
-      "owner": "",
-      "repo": "pdf-editor"
-    }
+    "publish": null
   }
 }

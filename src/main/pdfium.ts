@@ -11,6 +11,7 @@
 
 import { randomUUID } from 'node:crypto';
 import * as path from 'node:path';
+import { app } from 'electron';
 import type {
   PdfOpenResult,
   PdfRenderResult,
@@ -123,12 +124,31 @@ const STUB_ADDON: PdfiumAddon = {
 
 // ── Addon loader ────────────────────────────────────────────────────
 
+/**
+ * Resolve the native addon path for both dev and packaged (asar) builds.
+ *
+ * Dev:       <project>/native/pdfium/build/Release/pdfium.node
+ * Packaged:  <resources>/app.asar.unpacked/native/pdfium/build/Release/pdfium.node
+ */
+function resolveAddonPath(): string {
+  const isPackaged = app.isPackaged;
+  if (isPackaged) {
+    // In packaged mode, asarUnpack extracts files next to the asar archive
+    return path.join(
+      process.resourcesPath,
+      'app.asar.unpacked',
+      'native', 'pdfium', 'build', 'Release', 'pdfium.node',
+    );
+  }
+  // Dev mode — __dirname is dist/main/, project root is two levels up
+  return path.join(
+    __dirname, '..', '..', 'native', 'pdfium', 'build', 'Release', 'pdfium.node',
+  );
+}
+
 function loadAddon(): PdfiumAddon {
   try {
-    // Expected path: native/pdfium/build/Release/pdfium.node
-    const addonPath = path.join(
-      __dirname, '..', '..', 'native', 'pdfium', 'build', 'Release', 'pdfium.node',
-    );
+    const addonPath = resolveAddonPath();
     // eslint-disable-next-line @typescript-eslint/no-require-imports
     const addon = require(addonPath) as PdfiumAddon;
     console.log('[PdfiumEngine] Native addon loaded');

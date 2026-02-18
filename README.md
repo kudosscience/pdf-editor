@@ -88,6 +88,81 @@ Key features:
 | Single instance     | Second launch focuses existing window             |
 | Offline             | No network calls; auto-update disabled by default |
 
+## Packaging & Distribution
+
+### Build Installers
+
+```bash
+# Build for current platform
+npm run dist
+
+# Build for specific platform
+npm run dist:win     # Windows NSIS installer
+npm run dist:mac     # macOS DMG
+npm run dist:linux   # Linux AppImage
+```
+
+Installers are written to the `release/` directory.
+
+### Windows MSI (Enterprise)
+
+For enterprise environments requiring MSI packages:
+
+```bash
+# 1. Build unpacked app first
+npm run pack
+
+# 2. Compile MSI (requires WiX Toolset v3)
+npm run build:msi
+```
+
+**Prerequisites:** Install [WiX Toolset v3](https://wixtoolset.org/docs/wix3/) and ensure the `WIX` environment variable is set or WiX `bin/` is on PATH.
+
+### Native Addon in Packaged Builds
+
+The native PDFium addon (`pdfium.node` + shared library) is automatically extracted from the asar archive via `asarUnpack`. The addon loader in `src/main/pdfium.ts` detects packaged mode (`app.isPackaged`) and resolves the path to `app.asar.unpacked/native/pdfium/build/Release/`.
+
+### Code Signing & Notarization
+
+#### Windows (Authenticode)
+
+Set the following environment variables before running `npm run dist:win`:
+
+| Variable | Description |
+|----------|-------------|
+| `CSC_LINK` | Path to `.pfx` certificate file (or base64-encoded) |
+| `CSC_KEY_PASSWORD` | Certificate password |
+| `WIN_CSC_LINK` | *(optional)* Override for Windows-specific cert |
+
+electron-builder will sign the EXE automatically when these are set.
+
+#### macOS (Apple Notarization)
+
+Set the following environment variables:
+
+| Variable | Description |
+|----------|-------------|
+| `CSC_LINK` | Path to `.p12` Developer ID certificate (or base64) |
+| `CSC_KEY_PASSWORD` | Certificate password |
+| `APPLE_ID` | Apple ID email for notarization |
+| `APPLE_APP_SPECIFIC_PASSWORD` | App-specific password (generate at appleid.apple.com) |
+| `APPLE_TEAM_ID` | 10-character Team ID from developer.apple.com |
+
+The build uses `build/entitlements.mac.plist` which grants:
+- `com.apple.security.cs.allow-jit` — required by V8/Chromium
+- `com.apple.security.cs.allow-unsigned-executable-memory` — required by Electron
+- `com.apple.security.cs.disable-library-validation` — required for the prebuilt PDFium shared library
+
+#### Linux
+
+No code signing is typically required for AppImage distribution. For package managers (deb, rpm), GPG signing can be configured separately.
+
+### CI/CD Notes
+
+- Store signing certificates as **encrypted secrets** in your CI system (GitHub Actions, Azure DevOps, etc.)
+- Never commit `.pfx`, `.p12`, or password files to the repository
+- The `publish` field in `package.json` is set to `null` (auto-update disabled). Set it to a GitHub/S3/generic provider when ready to enable auto-updates.
+
 ## License
 
 MIT
