@@ -5,6 +5,7 @@
   "main": "dist/main/index.js",
   "scripts": {
     "build": "tsc -p tsconfig.main.json && tsc -p tsconfig.preload.json && tsc -p tsconfig.renderer.json",
+    "build:native": "cd native/pdfium && node-gyp rebuild",
     "start": "npm run build && electron dist/main/index.js",
     "dev": "npm run build && electron dist/main/index.js --dev",
     "lint": "eslint src --ext .ts",
@@ -18,12 +19,12 @@
     "@types/node": "^20.11.0",
     "electron": "^33.0.0",
     "electron-builder": "^25.0.0",
+    "electron-wix-msi": "^5.1.0",
     "typescript": "^5.6.0"
   },
   "dependencies": {
     "electron-updater": "^6.3.0",
-    "pdf-lib": "^1.17.1",
-    "pdfjs-dist": "^4.9.0"
+    "node-addon-api": "^8.0.0"
   },
   "build": {
     "appId": "com.pdfeditor.app",
@@ -34,10 +35,14 @@
     "files": [
       "dist/**/*",
       "src/renderer/**/*.html",
-      "src/renderer/**/*.css"
+      "src/renderer/**/*.css",
+      "native/pdfium/build/Release/*.node"
+    ],
+    "asarUnpack": [
+      "native/pdfium/build/Release/*.node"
     ],
     "win": {
-      "target": ["nsis"],
+      "target": ["nsis", "msi"],
       "icon": "assets/icon.ico"
     },
     "mac": {

@@ -20,6 +20,36 @@
     <button id="btn-open" title="Open PDF (Ctrl+O)">Open</button>
     <button id="btn-save" title="Save (Ctrl+S)" disabled>Save</button>
     <button id="btn-save-as" title="Save As (Ctrl+Shift+S)" disabled>Save As</button>
+
+    <span class="toolbar-separator"></span>
+
+    <!-- Zoom controls -->
+    <button id="btn-zoom-out" title="Zoom Out (Ctrl+-)" disabled>−</button>
+    <span id="zoom-level">100%</span>
+    <button id="btn-zoom-in" title="Zoom In (Ctrl+=)" disabled>+</button>
+    <button id="btn-zoom-fit" title="Fit to Width" disabled>Fit</button>
+
+    <span class="toolbar-separator"></span>
+
+    <!-- Page navigation -->
+    <button id="btn-prev-page" title="Previous Page (PgUp)" disabled>◀</button>
+    <input id="page-input" type="number" min="1" value="1" title="Go to page" disabled />
+    <span id="page-total">/ 0</span>
+    <button id="btn-next-page" title="Next Page (PgDn)" disabled>▶</button>
+
+    <span class="toolbar-separator"></span>
+
+    <!-- Editing tools -->
+    <button id="btn-tool-select" title="Select Tool (V)" disabled class="tool-btn active">Select</button>
+    <button id="btn-tool-edit-text" title="Edit Text (T)" disabled class="tool-btn">Text</button>
+    <button id="btn-tool-replace-image" title="Replace Image (I)" disabled class="tool-btn">Image</button>
+
+    <span class="toolbar-separator"></span>
+
+    <!-- Undo / Redo -->
+    <button id="btn-undo" title="Undo (Ctrl+Z)" disabled>Undo</button>
+    <button id="btn-redo" title="Redo (Ctrl+Shift+Z)" disabled>Redo</button>
+
     <span id="file-name">No file open</span>
     <span id="app-version" class="version-label"></span>
   </header>
@@ -31,10 +61,13 @@
       <p class="placeholder">Thumbnails</p>
     </aside>
     <section id="viewer-container">
-      <!-- PDF.js canvas/text layer rendered here by Task 1-2 -->
+      <!-- Canvas-based PDF rendering via PDFium -->
       <div id="drop-zone" class="empty-state">
         <p>Drop a PDF here or click <strong>Open</strong></p>
       </div>
+      <canvas id="page-canvas" style="display: none;"></canvas>
+      <!-- Selection overlay canvas (transparent, above page canvas) -->
+      <canvas id="overlay-canvas" style="display: none;"></canvas>
     </section>
     <aside id="properties-panel">
       <!-- Annotation/object properties by Tasks 1-3, 2-4 -->
@@ -45,7 +78,9 @@
   <!-- ── Status bar ──────────────────────────────────────────── -->
   <footer id="status-bar">
     <span id="status-text">Ready</span>
+    <span id="dirty-indicator" style="display: none;">●</span>
     <span id="page-info"></span>
+    <span id="zoom-info"></span>
   </footer>
 
   <script src="../../dist/renderer/app.js" type="module"></script>

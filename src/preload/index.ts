@@ -12,6 +12,16 @@ import {
   type FileOpenResult,
   type FileSavePayload,
   type UpdateStatusPayload,
+  type PdfOpenPayload,
+  type PdfOpenResult,
+  type PdfRenderPagePayload,
+  type PdfRenderResult,
+  type PdfListObjectsPayload,
+  type PageObject,
+  type PdfEditTextPayload,
+  type PdfReplaceImagePayload,
+  type PdfSavePayload,
+  type PdfSaveResult,
 } from '../shared/ipc-schema';
 
 /**
@@ -73,6 +83,43 @@ const api = {
     };
     ipcRenderer.on(IPC_CHANNELS.DOCUMENT_ERROR, handler);
     return () => ipcRenderer.removeListener(IPC_CHANNELS.DOCUMENT_ERROR, handler);
+  },
+
+  // ── PDF engine (PDFium) ─────────────────────────────────────────
+
+  pdf: {
+    open: (payload: PdfOpenPayload): Promise<PdfOpenResult> =>
+      ipcRenderer.invoke(IPC_CHANNELS.PDF_OPEN, payload),
+
+    close: (docId: string): Promise<void> =>
+      ipcRenderer.invoke(IPC_CHANNELS.PDF_CLOSE, docId),
+
+    getPageCount: (docId: string): Promise<number> =>
+      ipcRenderer.invoke(IPC_CHANNELS.PDF_GET_PAGE_COUNT, docId),
+
+    renderPage: (payload: PdfRenderPagePayload): Promise<PdfRenderResult> =>
+      ipcRenderer.invoke(IPC_CHANNELS.PDF_RENDER_PAGE, payload),
+
+    listObjects: (payload: PdfListObjectsPayload): Promise<PageObject[]> =>
+      ipcRenderer.invoke(IPC_CHANNELS.PDF_LIST_OBJECTS, payload),
+
+    editText: (payload: PdfEditTextPayload): Promise<{ ok: true }> =>
+      ipcRenderer.invoke(IPC_CHANNELS.PDF_EDIT_TEXT, payload),
+
+    replaceImage: (payload: PdfReplaceImagePayload): Promise<{ ok: true }> =>
+      ipcRenderer.invoke(IPC_CHANNELS.PDF_REPLACE_IMAGE, payload),
+
+    save: (payload: PdfSavePayload): Promise<PdfSaveResult> =>
+      ipcRenderer.invoke(IPC_CHANNELS.PDF_SAVE, payload),
+
+    /** Subscribe to page-rendered events from main. */
+    onPageRendered: (callback: (payload: { docId: string; pageIndex: number }) => void): (() => void) => {
+      const handler = (_event: Electron.IpcRendererEvent, payload: { docId: string; pageIndex: number }): void => {
+        callback(payload);
+      };
+      ipcRenderer.on(IPC_CHANNELS.PDF_PAGE_RENDERED, handler);
+      return () => ipcRenderer.removeListener(IPC_CHANNELS.PDF_PAGE_RENDERED, handler);
+    },
   },
 };
 

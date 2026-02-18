@@ -17,7 +17,7 @@ import {
   MIN_WINDOW_WIDTH,
   MIN_WINDOW_HEIGHT,
 } from '../shared/constants';
-import { registerIpcHandlers } from './ipc-handlers';
+import { registerIpcHandlers, cleanupPdfium } from './ipc-handlers';
 
 /** Keep a global reference to prevent GC. */
 let mainWindow: BrowserWindow | null = null;
@@ -117,6 +117,7 @@ app.whenReady().then(() => {
 });
 
 app.on('window-all-closed', () => {
+  cleanupPdfium();
   // macOS convention: stay alive until explicit quit
   if (process.platform !== 'darwin') {
     app.quit();

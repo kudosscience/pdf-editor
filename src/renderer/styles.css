@@ -53,6 +53,44 @@ html, body {
 #toolbar button:hover:not(:disabled) { background: var(--accent); }
 #toolbar button:disabled { opacity: 0.4; cursor: default; }
 
+.toolbar-separator {
+  width: 1px;
+  height: 20px;
+  background: var(--border);
+  margin: 0 4px;
+}
+
+.tool-btn.active {
+  background: var(--accent) !important;
+  border-color: var(--accent-hover);
+}
+
+#page-input {
+  width: 48px;
+  background: var(--bg-tertiary);
+  color: var(--text-primary);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 2px 4px;
+  font-size: 12px;
+  text-align: center;
+  -webkit-app-region: no-drag;
+}
+#page-input:disabled { opacity: 0.4; }
+
+#page-total {
+  font-size: 12px;
+  color: var(--text-secondary);
+  margin-right: 4px;
+}
+
+#zoom-level {
+  font-size: 12px;
+  color: var(--text-secondary);
+  min-width: 40px;
+  text-align: center;
+}
+
 #file-name {
   flex: 1;
   text-align: center;
@@ -129,4 +167,116 @@ html, body {
   border-top: 1px solid var(--border);
   font-size: 11px;
   color: var(--text-secondary);
+}
+
+#dirty-indicator {
+  color: var(--accent);
+  font-size: 14px;
+  margin-left: 8px;
+}
+
+#zoom-info {
+  margin-left: auto;
+  padding-left: 12px;
+}
+
+/* ── Canvas viewer ────────────────────────────────────────────── */
+#page-canvas,
+#overlay-canvas {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+#overlay-canvas {
+  pointer-events: auto;
+  z-index: 10;
+}
+#page-canvas {
+  z-index: 1;
+  background: white;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.3);
+}
+
+/* ── Thumbnails sidebar ───────────────────────────────────────── */
+#thumbnails-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: center;
+  padding-top: 8px;
+}
+
+.thumbnail-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 4px;
+  border: 2px solid transparent;
+  transition: border-color 0.15s;
+}
+.thumbnail-item:hover { border-color: var(--border); }
+.thumbnail-item.active { border-color: var(--accent); }
+
+.thumbnail-canvas {
+  max-width: 160px;
+  max-height: 200px;
+  background: white;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
+}
+
+.thumbnail-label {
+  font-size: 10px;
+  color: var(--text-secondary);
+  margin-top: 2px;
+}
+
+/* ── In-place text editor overlay ─────────────────────────────── */
+.in-place-text-editor {
+  position: absolute;
+  z-index: 20;
+  background: rgba(255, 255, 255, 0.95);
+  color: #000;
+  border: 2px solid var(--accent);
+  border-radius: 2px;
+  padding: 2px 4px;
+  font-family: serif;
+  line-height: 1.2;
+  outline: none;
+  min-width: 40px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+/* ── Properties panel ─────────────────────────────────────────── */
+.properties-content {
+  padding: 8px;
+  font-size: 12px;
+}
+.properties-content h4 {
+  color: var(--text-primary);
+  margin-bottom: 8px;
+  font-size: 13px;
+}
+.properties-content p {
+  color: var(--text-secondary);
+  margin-bottom: 4px;
+}
+.properties-content .indent {
+  padding-left: 12px;
+}
+
+/* ── Loading spinner ──────────────────────────────────────────── */
+.loading-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(30, 30, 30, 0.7);
+  z-index: 50;
+  color: var(--text-primary);
+  font-size: 14px;
 }
