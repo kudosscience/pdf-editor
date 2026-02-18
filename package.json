@@ -1,0 +1,59 @@
+{
+  "name": "pdf-editor",
+  "version": "0.1.0",
+  "description": "Cross-platform PDF editor with WYSIWYG editing — Electron + open-source libraries",
+  "main": "dist/main/index.js",
+  "scripts": {
+    "build": "tsc -p tsconfig.main.json && tsc -p tsconfig.preload.json && tsc -p tsconfig.renderer.json",
+    "start": "npm run build && electron dist/main/index.js",
+    "dev": "npm run build && electron dist/main/index.js --dev",
+    "lint": "eslint src --ext .ts",
+    "test": "jest",
+    "pack": "electron-builder --dir",
+    "dist": "electron-builder"
+  },
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/node": "^20.11.0",
+    "electron": "^33.0.0",
+    "electron-builder": "^25.0.0",
+    "typescript": "^5.6.0"
+  },
+  "dependencies": {
+    "electron-updater": "^6.3.0",
+    "pdf-lib": "^1.17.1",
+    "pdfjs-dist": "^4.9.0"
+  },
+  "build": {
+    "appId": "com.pdfeditor.app",
+    "productName": "PDF Editor",
+    "directories": {
+      "output": "release"
+    },
+    "files": [
+      "dist/**/*",
+      "src/renderer/**/*.html",
+      "src/renderer/**/*.css"
+    ],
+    "win": {
+      "target": ["nsis"],
+      "icon": "assets/icon.ico"
+    },
+    "mac": {
+      "target": ["dmg"],
+      "icon": "assets/icon.icns",
+      "hardenedRuntime": true,
+      "gatekeeperAssess": false
+    },
+    "linux": {
+      "target": ["AppImage"],
+      "icon": "assets/icon.png"
+    },
+    "publish": {
+      "provider": "github",
+      "owner": "",
+      "repo": "pdf-editor"
+    }
+  }
+}

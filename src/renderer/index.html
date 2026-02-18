@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <!--
+    CSP is also enforced via response headers in main/index.ts.
+    This meta tag is a defence-in-depth fallback.
+  -->
+  <meta
+    http-equiv="Content-Security-Policy"
+    content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; connect-src 'self'; worker-src 'self' blob:; object-src 'none'; base-uri 'none'; form-action 'none'; frame-ancestors 'none';"
+  />
+  <title>PDF Editor</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <!-- ── Toolbar ──────────────────────────────────────────────── -->
+  <header id="toolbar">
+    <button id="btn-open" title="Open PDF (Ctrl+O)">Open</button>
+    <button id="btn-save" title="Save (Ctrl+S)" disabled>Save</button>
+    <button id="btn-save-as" title="Save As (Ctrl+Shift+S)" disabled>Save As</button>
+    <span id="file-name">No file open</span>
+    <span id="app-version" class="version-label"></span>
+  </header>
+
+  <!-- ── Main workspace ──────────────────────────────────────── -->
+  <main id="workspace">
+    <aside id="thumbnails-panel">
+      <!-- Thumbnails rendered here by Task 1-2 -->
+      <p class="placeholder">Thumbnails</p>
+    </aside>
+    <section id="viewer-container">
+      <!-- PDF.js canvas/text layer rendered here by Task 1-2 -->
+      <div id="drop-zone" class="empty-state">
+        <p>Drop a PDF here or click <strong>Open</strong></p>
+      </div>
+    </section>
+    <aside id="properties-panel">
+      <!-- Annotation/object properties by Tasks 1-3, 2-4 -->
+      <p class="placeholder">Properties</p>
+    </aside>
+  </main>
+
+  <!-- ── Status bar ──────────────────────────────────────────── -->
+  <footer id="status-bar">
+    <span id="status-text">Ready</span>
+    <span id="page-info"></span>
+  </footer>
+
+  <script src="../../dist/renderer/app.js" type="module"></script>
+</body>
+</html>

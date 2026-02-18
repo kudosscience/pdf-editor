@@ -1,0 +1,132 @@
+/* ── Reset & base ──────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg-primary: #1e1e1e;
+  --bg-secondary: #252526;
+  --bg-tertiary: #2d2d2d;
+  --text-primary: #cccccc;
+  --text-secondary: #969696;
+  --accent: #0078d4;
+  --accent-hover: #1a8cff;
+  --border: #3c3c3c;
+  --danger: #f44747;
+  --toolbar-height: 40px;
+  --statusbar-height: 24px;
+  --sidebar-width: 200px;
+}
+
+html, body {
+  height: 100%;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen,
+    Ubuntu, Cantarell, sans-serif;
+  font-size: 13px;
+  color: var(--text-primary);
+  background: var(--bg-primary);
+  overflow: hidden;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+/* ── Toolbar ──────────────────────────────────────────────────── */
+#toolbar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: var(--toolbar-height);
+  padding: 0 12px;
+  background: var(--bg-secondary);
+  border-bottom: 1px solid var(--border);
+  -webkit-app-region: drag;
+}
+
+#toolbar button {
+  -webkit-app-region: no-drag;
+  background: var(--bg-tertiary);
+  color: var(--text-primary);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 4px 12px;
+  cursor: pointer;
+  font-size: 12px;
+}
+#toolbar button:hover:not(:disabled) { background: var(--accent); }
+#toolbar button:disabled { opacity: 0.4; cursor: default; }
+
+#file-name {
+  flex: 1;
+  text-align: center;
+  color: var(--text-secondary);
+  font-size: 12px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  -webkit-app-region: drag;
+}
+
+.version-label {
+  font-size: 11px;
+  color: var(--text-secondary);
+}
+
+/* ── Workspace layout ─────────────────────────────────────────── */
+#workspace {
+  display: flex;
+  height: calc(100% - var(--toolbar-height) - var(--statusbar-height));
+}
+
+#thumbnails-panel,
+#properties-panel {
+  width: var(--sidebar-width);
+  background: var(--bg-secondary);
+  border-right: 1px solid var(--border);
+  overflow-y: auto;
+  padding: 8px;
+}
+#properties-panel {
+  border-right: none;
+  border-left: 1px solid var(--border);
+}
+
+.placeholder {
+  color: var(--text-secondary);
+  text-align: center;
+  padding-top: 24px;
+  font-size: 12px;
+}
+
+#viewer-container {
+  flex: 1;
+  position: relative;
+  overflow: auto;
+  background: var(--bg-tertiary);
+}
+
+/* ── Empty / drop state ───────────────────────────────────────── */
+.empty-state {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  color: var(--text-secondary);
+  font-size: 16px;
+}
+
+#drop-zone.drag-over {
+  background: rgba(0, 120, 212, 0.08);
+  outline: 2px dashed var(--accent);
+  outline-offset: -8px;
+}
+
+/* ── Status bar ───────────────────────────────────────────────── */
+#status-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: var(--statusbar-height);
+  padding: 0 12px;
+  background: var(--bg-secondary);
+  border-top: 1px solid var(--border);
+  font-size: 11px;
+  color: var(--text-secondary);
+}
