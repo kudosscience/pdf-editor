@@ -11,6 +11,8 @@
     "dev": "npm run build && electron dist/main/index.js --dev",
     "lint": "eslint src --ext .ts",
     "test": "jest",
+    "test:e2e": "npx playwright test",
+    "generate:fixtures": "node scripts/generate-fixtures.js",
     "pack": "electron-builder --dir",
     "dist": "electron-builder",
     "dist:win": "electron-builder --win",
@@ -21,12 +23,15 @@
   "author": "",
   "license": "MIT",
   "devDependencies": {
+    "@playwright/test": "^1.58.2",
     "@types/node": "^20.11.0",
     "electron": "^33.0.0",
     "electron-builder": "^25.0.0",
     "electron-wix-msi": "^5.1.0",
     "esbuild": "^0.27.3",
     "node-gyp": "^12.2.0",
+    "pdf-lib": "^1.17.1",
+    "playwright": "^1.58.2",
     "typescript": "^5.6.0"
   },
   "dependencies": {
@@ -52,14 +57,21 @@
       {
         "from": "native/pdfium/build/Release/",
         "to": "native-addon",
-        "filter": ["*.node", "*.dll", "*.so", "*.dylib"]
+        "filter": [
+          "*.node",
+          "*.dll",
+          "*.so",
+          "*.dylib"
+        ]
       }
     ],
     "win": {
       "target": [
         {
           "target": "nsis",
-          "arch": ["x64"]
+          "arch": [
+            "x64"
+          ]
         }
       ],
       "icon": "assets/icon.ico",
@@ -80,7 +92,10 @@
       "target": [
         {
           "target": "dmg",
-          "arch": ["x64", "arm64"]
+          "arch": [
+            "x64",
+            "arm64"
+          ]
         }
       ],
       "icon": "assets/icon.icns",
@@ -92,15 +107,25 @@
     },
     "dmg": {
       "contents": [
-        { "x": 130, "y": 220 },
-        { "x": 410, "y": 220, "type": "link", "path": "/Applications" }
+        {
+          "x": 130,
+          "y": 220
+        },
+        {
+          "x": 410,
+          "y": 220,
+          "type": "link",
+          "path": "/Applications"
+        }
       ]
     },
     "linux": {
       "target": [
         {
           "target": "AppImage",
-          "arch": ["x64"]
+          "arch": [
+            "x64"
+          ]
         }
       ],
       "icon": "assets/icon.png",

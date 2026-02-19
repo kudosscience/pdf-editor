@@ -33,6 +33,7 @@ const zoomInfoEl = document.getElementById('zoom-info') as HTMLSpanElement;
 const dirtyIndicator = document.getElementById('dirty-indicator') as HTMLSpanElement;
 const dropZone = document.getElementById('drop-zone') as HTMLDivElement;
 const viewerContainer = document.getElementById('viewer-container') as HTMLElement;
+const canvasWrapper = document.getElementById('canvas-wrapper') as HTMLDivElement;
 const pageCanvas = document.getElementById('page-canvas') as HTMLCanvasElement;
 const overlayCanvas = document.getElementById('overlay-canvas') as HTMLCanvasElement;
 
@@ -246,8 +247,7 @@ async function handleOpen(): Promise<void> {
 
   // Hide drop zone, show canvas
   dropZone.style.display = 'none';
-  pageCanvas.style.display = 'block';
-  overlayCanvas.style.display = 'block';
+  canvasWrapper.style.display = 'grid';
 
   updatePageInfo();
   updateZoomInfo();
@@ -338,8 +338,7 @@ async function handleDrop(e: DragEvent): Promise<void> {
 
   enableDocumentControls();
   dropZone.style.display = 'none';
-  pageCanvas.style.display = 'block';
-  overlayCanvas.style.display = 'block';
+  canvasWrapper.style.display = 'grid';
 
   updatePageInfo();
   updateZoomInfo();

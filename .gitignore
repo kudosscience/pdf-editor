@@ -10,3 +10,8 @@ Thumbs.db
 # Native addon build artifacts
 native/pdfium/build/
 native/pdfium/vendor/
+
+# Test artifacts
+test-results/
+test/fixtures/_test-profile-*/
+debug.log

@@ -129,15 +129,17 @@ app.on('window-all-closed', () => {
 // Disable hardware acceleration if issues arise (uncomment if needed):
 // app.disableHardwareAcceleration();
 
-// Prevent multiple instances
-const gotLock = app.requestSingleInstanceLock();
-if (!gotLock) {
-  app.quit();
-} else {
-  app.on('second-instance', () => {
-    if (mainWindow) {
-      if (mainWindow.isMinimized()) mainWindow.restore();
-      mainWindow.focus();
-    }
-  });
+// Prevent multiple instances (disabled in test mode for E2E parallel launches)
+if (process.env.NODE_ENV !== 'test') {
+  const gotLock = app.requestSingleInstanceLock();
+  if (!gotLock) {
+    app.quit();
+  } else {
+    app.on('second-instance', () => {
+      if (mainWindow) {
+        if (mainWindow.isMinimized()) mainWindow.restore();
+        mainWindow.focus();
+      }
+    });
+  }
 }
