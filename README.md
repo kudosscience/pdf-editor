@@ -1,9 +1,45 @@
 # PDF Editor
 
 Cross-platform desktop PDF editor with WYSIWYG text and image editing.  
-Built with **Electron**, **PDFium** (native N-API addon), and **TypeScript** — fully offline, no cloud dependencies.
+Fully offline — no cloud, no subscriptions, no account required.
 
-## Quick Start
+---
+
+## Download
+
+Pick the installer for your operating system:
+
+| Operating System | Download | Notes |
+|:---:|:---:|:---|
+| **Windows** | [**Download for Windows**](https://github.com/kudosscience/pdf-editor/releases/latest/download/PDF.Editor.Setup.0.1.0.exe) | Run the `.exe` installer and follow the prompts |
+| **macOS (Apple Silicon)** | [**Download for Mac (M1/M2/M3)**](https://github.com/kudosscience/pdf-editor/releases/latest/download/PDF.Editor-0.1.0-arm64.dmg) | Open the `.dmg`, drag PDF Editor to Applications |
+| **macOS (Intel)** | [**Download for Mac (Intel)**](https://github.com/kudosscience/pdf-editor/releases/latest/download/PDF.Editor-0.1.0.dmg) | Open the `.dmg`, drag PDF Editor to Applications |
+| **Linux** | [**Download for Linux**](https://github.com/kudosscience/pdf-editor/releases/latest/download/PDF.Editor-0.1.0.AppImage) | Make executable: `chmod +x *.AppImage`, then run |
+
+> **Not sure which Mac you have?** Click the Apple menu () → **About This Mac**. If the chip says "Apple M1" / "M2" / "M3" etc., choose **Apple Silicon**. Otherwise choose **Intel**.
+
+All downloads are also available on the [Releases page](https://github.com/kudosscience/pdf-editor/releases).
+
+---
+
+## Features
+
+- **Edit text** directly on the PDF — double-click any text to modify it
+- **Replace images** — swap embedded images with your own PNG or JPEG files
+- **Undo / Redo** — full edit history with Ctrl+Z / Ctrl+Shift+Z
+- **Multi-page** — navigate, zoom, and edit any page
+- **Save & Save As** — Ctrl+S overwrites; Ctrl+Shift+S saves a copy
+- **Thumbnails** — sidebar page previews for quick navigation
+- **100% offline** — no internet connection needed, your files never leave your computer
+- **Open source** — MIT licensed
+
+---
+
+## For Developers
+
+Built with **Electron**, **PDFium** (native N-API addon), and **TypeScript**.
+
+### Quick Start
 
 ```bash
 npm install
@@ -15,9 +51,7 @@ Development mode (DevTools open):
 npm run dev
 ```
 
-## Build
-
-```bash
+### Build
 # Compile TypeScript only
 npm run build
 
@@ -39,7 +73,7 @@ npm run dist
 | macOS    | DMG | Hardened runtime, notarised |
 | Linux    | AppImage | Universal, no-install |
 
-## Architecture
+### Architecture
 
 ```
 src/
@@ -62,7 +96,7 @@ native/
     └── src/
 ```
 
-### PDFium Engine
+#### PDFium Engine
 
 The rendering and editing engine is **PDFium** (Chromium's PDF library), exposed to Node.js via a native N-API addon. The `PdfiumEngine` TypeScript façade manages document handles, validates inputs, normalises errors, and provides typed async methods.
 
@@ -75,7 +109,7 @@ Key features:
 - **Image replacement:** `replaceImageObject` swaps embedded images (PNG/JPEG)
 - **Save:** `FPDF_SaveAsCopy` serialisation with dirty-state tracking
 
-### Security Model
+#### Security Model
 
 | Layer               | Protection                                       |
 |---------------------|--------------------------------------------------|
@@ -88,9 +122,9 @@ Key features:
 | Single instance     | Second launch focuses existing window             |
 | Offline             | No network calls; auto-update disabled by default |
 
-## Packaging & Distribution
+### Packaging & Distribution
 
-### Build Installers
+#### Build Installers
 
 ```bash
 # Build for current platform
@@ -104,7 +138,7 @@ npm run dist:linux   # Linux AppImage
 
 Installers are written to the `release/` directory.
 
-### Windows MSI (Enterprise)
+#### Windows MSI (Enterprise)
 
 For enterprise environments requiring MSI packages:
 
@@ -118,13 +152,13 @@ npm run build:msi
 
 **Prerequisites:** Install [WiX Toolset v3](https://wixtoolset.org/docs/wix3/) and ensure the `WIX` environment variable is set or WiX `bin/` is on PATH.
 
-### Native Addon in Packaged Builds
+#### Native Addon in Packaged Builds
 
 The native PDFium addon (`pdfium.node` + shared library) is automatically extracted from the asar archive via `asarUnpack`. The addon loader in `src/main/pdfium.ts` detects packaged mode (`app.isPackaged`) and resolves the path to `app.asar.unpacked/native/pdfium/build/Release/`.
 
-### Code Signing & Notarization
+#### Code Signing & Notarization
 
-#### Windows (Authenticode)
+##### Windows (Authenticode)
 
 Set the following environment variables before running `npm run dist:win`:
 
@@ -136,7 +170,7 @@ Set the following environment variables before running `npm run dist:win`:
 
 electron-builder will sign the EXE automatically when these are set.
 
-#### macOS (Apple Notarization)
+##### macOS (Apple Notarization)
 
 Set the following environment variables:
 
@@ -153,11 +187,11 @@ The build uses `build/entitlements.mac.plist` which grants:
 - `com.apple.security.cs.allow-unsigned-executable-memory` — required by Electron
 - `com.apple.security.cs.disable-library-validation` — required for the prebuilt PDFium shared library
 
-#### Linux
+##### Linux
 
 No code signing is typically required for AppImage distribution. For package managers (deb, rpm), GPG signing can be configured separately.
 
-### CI/CD Notes
+#### CI/CD Notes
 
 - Store signing certificates as **encrypted secrets** in your CI system (GitHub Actions, Azure DevOps, etc.)
 - Never commit `.pfx`, `.p12`, or password files to the repository
