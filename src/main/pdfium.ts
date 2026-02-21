@@ -11,7 +11,7 @@
 
 import { randomUUID } from 'node:crypto';
 import * as path from 'node:path';
-import { app } from 'electron';
+import { app, nativeImage } from 'electron';
 import type {
   PdfOpenResult,
   PdfRenderResult,
@@ -78,6 +78,7 @@ interface PdfiumAddon {
     top: number;
     right: number;
     bottom: number;
+    text?: string;
   }>;
   editTextObject(
     handle: number,
@@ -93,6 +94,15 @@ interface PdfiumAddon {
     objectId: number,
     imageData: Buffer,
     format: string,
+  ): void;
+  /** Replace an image object with raw BGRA pixel data. */
+  replaceImageObjectBitmap(
+    handle: number,
+    pageIndex: number,
+    objectId: number,
+    bgraData: Buffer,
+    width: number,
+    height: number,
   ): void;
   /** Serialise the document to a Buffer (FPDF_SaveAsCopy). */
   saveDocument(handle: number): Buffer;
@@ -117,6 +127,7 @@ const STUB_ADDON: PdfiumAddon = {
   },
   editTextObject() { /* no-op */ },
   replaceImageObject() { /* no-op */ },
+  replaceImageObjectBitmap() { /* no-op */ },
   saveDocument(_handle: number): Buffer {
     return Buffer.alloc(0);
   },
@@ -168,6 +179,12 @@ export class PdfiumEngine {
   private readonly addon: PdfiumAddon;
   /** Map from docId (UUID) → native handle. */
   private readonly handles = new Map<string, number>();
+  /**
+   * Pin the Buffer passed to FPDF_LoadMemDocument so V8's GC cannot free
+   * the underlying memory while PDFium still references it.
+   * Released when the document is closed.
+   */
+  private readonly pinnedBuffers = new Map<string, Buffer>();
 
   constructor() {
     this.addon = loadAddon();
@@ -182,6 +199,9 @@ export class PdfiumEngine {
       const handle = this.addon.openDocument(buf, password);
       const docId = randomUUID();
       this.handles.set(docId, handle);
+      // Keep buf alive for the lifetime of the document — FPDF_LoadMemDocument
+      // does NOT copy the data; it holds a pointer into this buffer.
+      this.pinnedBuffers.set(docId, buf);
       const pageCount = this.addon.getPageCount(handle);
       return { docId, pageCount };
     } catch (err) {
@@ -197,6 +217,7 @@ export class PdfiumEngine {
     const handle = this.requireHandle(docId);
     this.addon.closeDocument(handle);
     this.handles.delete(docId);
+    this.pinnedBuffers.delete(docId);
   }
 
   /** Close all open documents (cleanup on app quit). */
@@ -209,6 +230,7 @@ export class PdfiumEngine {
       }
     }
     this.handles.clear();
+    this.pinnedBuffers.clear();
   }
 
   /** Get page count for an open document. */
@@ -258,6 +280,7 @@ export class PdfiumEngine {
       top: obj.top,
       right: obj.right,
       bottom: obj.bottom,
+      ...(obj.text !== undefined ? { text: obj.text } : {}),
     }));
   }
 
@@ -314,13 +337,26 @@ export class PdfiumEngine {
     }
 
     try {
-      this.addon.replaceImageObject(
-        handle,
-        pageIndex,
-        objectId,
-        Buffer.from(imageData),
-        format,
-      );
+      if (format === 'png') {
+        // Decode PNG to raw BGRA bitmap using Electron's nativeImage,
+        // then use the bitmap-based replacement path that preserves alpha.
+        const img = nativeImage.createFromBuffer(Buffer.from(imageData));
+        if (img.isEmpty()) {
+          throw new Error('Failed to decode PNG image');
+        }
+        const size = img.getSize();
+        const bgraBuf = img.toBitmap();
+        this.addon.replaceImageObjectBitmap(
+          handle, pageIndex, objectId,
+          bgraBuf, size.width, size.height,
+        );
+      } else {
+        // JPEG path — embed directly via FPDFImageObj_LoadJpegFileInline
+        this.addon.replaceImageObject(
+          handle, pageIndex, objectId,
+          Buffer.from(imageData), format,
+        );
+      }
     } catch (err) {
       throw new PdfiumError(
         PDFIUM_ERROR_CODES.EDIT_FAILED,

@@ -9,9 +9,12 @@
 #include "render.h"
 #include "objects.h"
 
+#include <fpdf_edit.h>
+
 // ── Global state definitions ────────────────────────────────────────
 
 std::map<int, FPDF_DOCUMENT> g_documents;
+std::map<int, std::map<int, CachedPage>> g_pageCache;
 int g_nextHandle = 1;
 bool g_initialized = false;
 
@@ -42,11 +45,73 @@ FPDF_DOCUMENT RequireDocument(Napi::Env env, int handle) {
   return it->second;
 }
 
+// ── Page cache helpers ──────────────────────────────────────────────
+
+FPDF_PAGE AcquirePage(int handle, FPDF_DOCUMENT doc, int pageIndex,
+                       bool& fromCache) {
+  auto docIt = g_pageCache.find(handle);
+  if (docIt != g_pageCache.end()) {
+    auto pgIt = docIt->second.find(pageIndex);
+    if (pgIt != docIt->second.end()) {
+      fromCache = true;
+      return pgIt->second.page;
+    }
+  }
+  fromCache = false;
+  return FPDF_LoadPage(doc, pageIndex);
+}
+
+void ReleasePage(int handle, int pageIndex, FPDF_PAGE page, bool fromCache) {
+  // Cached pages stay open; non-cached pages are closed immediately.
+  if (!fromCache) {
+    FPDF_ClosePage(page);
+  }
+}
+
+void CachePageDirty(int handle, int pageIndex, FPDF_PAGE page) {
+  g_pageCache[handle][pageIndex] = { page, true };
+}
+
+bool FlushAndCloseCachedPages(int handle) {
+  auto docIt = g_pageCache.find(handle);
+  if (docIt == g_pageCache.end()) return true;
+
+  bool allOk = true;
+  for (auto& [idx, cp] : docIt->second) {
+    if (cp.dirty) {
+      if (!FPDFPage_GenerateContent(cp.page)) {
+        allOk = false;
+      }
+    }
+    FPDF_ClosePage(cp.page);
+  }
+  g_pageCache.erase(docIt);
+  return allOk;
+}
+
+void DiscardCachedPages(int handle) {
+  auto docIt = g_pageCache.find(handle);
+  if (docIt == g_pageCache.end()) return;
+
+  for (auto& [idx, cp] : docIt->second) {
+    FPDF_ClosePage(cp.page);
+  }
+  g_pageCache.erase(docIt);
+}
+
 /**
  * Cleanup hook — called when the Node.js environment is torn down.
  * Closes all open documents and destroys the PDFium library.
  */
 static void Cleanup(void* /*arg*/) {
+  // Close all cached pages before closing documents
+  for (auto& [handle, pages] : g_pageCache) {
+    for (auto& [idx, cp] : pages) {
+      FPDF_ClosePage(cp.page);
+    }
+  }
+  g_pageCache.clear();
+
   for (auto& [id, doc] : g_documents) {
     FPDF_CloseDocument(doc);
   }
@@ -82,6 +147,8 @@ Napi::Object Init(Napi::Env env, Napi::Object exports) {
     Napi::Function::New(env, EditTextObject));
   exports.Set("replaceImageObject",
     Napi::Function::New(env, ReplaceImageObject));
+  exports.Set("replaceImageObjectBitmap",
+    Napi::Function::New(env, ReplaceImageObjectBitmap));
 
   // Register cleanup hook for process exit
   napi_add_env_cleanup_hook(env, Cleanup, nullptr);

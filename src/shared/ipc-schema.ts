@@ -132,6 +132,8 @@ export interface PageObject {
   top: number;
   right: number;
   bottom: number;
+  /** Text content (only present for type === 'text'). */
+  text?: string;
 }
 
 /** Payload for editing text content of an object. */

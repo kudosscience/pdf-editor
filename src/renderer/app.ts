@@ -603,8 +603,9 @@ function openInPlaceTextEditor(obj: PageObject): void {
   editor.style.minHeight = `${h}px`;
   editor.style.fontSize = `${12 * scale}px`;
 
-  // Placeholder text — actual text extraction would come from PDFium
-  editor.textContent = '(edit text here)';
+  // Pre-fill with the object's current text content
+  const originalText = obj.text ?? '';
+  editor.textContent = originalText;
 
   const commitEdit = async (): Promise<void> => {
     const newText = editor.textContent?.trim() ?? '';
@@ -614,7 +615,6 @@ function openInPlaceTextEditor(obj: PageObject): void {
     const docId = state.docId;
     const pageIndex = state.currentPage;
     const objectId = obj.id;
-    const originalText = '(original)'; // Would be fetched from PDFium
 
     const cmd: EditCommand = {
       description: `Edit text object ${objectId}`,

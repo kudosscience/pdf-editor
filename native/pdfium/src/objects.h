@@ -24,4 +24,11 @@ void EditTextObject(const Napi::CallbackInfo& info);
  */
 void ReplaceImageObject(const Napi::CallbackInfo& info);
 
+/**
+ * replaceImageObjectBitmap(handle, pageIndex, objectId, bgraData, width, height)
+ * → void
+ * Replaces an image object using raw BGRA pixel data.
+ */
+void ReplaceImageObjectBitmap(const Napi::CallbackInfo& info);
+
 #endif // PDFIUM_ADDON_OBJECTS_H

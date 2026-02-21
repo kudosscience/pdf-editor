@@ -12,4 +12,4 @@ This document lists all tasks associated with PBI 1.
 | 1-5 | [Canvas viewer UI](./1-5.md) | Done | Zoom/pan, page navigation, thumbnail sidebar, drag-drop open, status bar. |
 | 1-6 | [Packaging and signing per OS](./1-6.md) | Done | Windows MSI (WiX), macOS notarized DMG, Linux AppImage. |
 | 1-7 | [E2E CoS Test for PBI 1](./1-7.md) | Done | Viewer E2E tests with curated PDF fixtures; offline verification. |
-| 1-8 | [Fix scroll offset when canvas exceeds viewport](./1-8.md) | Review | Bug: PDF top clipped when zoomed beyond viewport due to absolute centering. |
+| 1-8 | [Fix scroll offset when canvas exceeds viewport](./1-8.md) | Done | Bug: PDF top clipped when zoomed beyond viewport due to absolute centering. |

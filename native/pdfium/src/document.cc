@@ -90,6 +90,9 @@ void CloseDocument(const Napi::CallbackInfo& info) {
     return;
   }
 
+  // Discard any cached pages for this document before closing it.
+  DiscardCachedPages(handle);
+
   FPDF_CloseDocument(it->second);
   g_documents.erase(it);
 }
@@ -149,6 +152,15 @@ Napi::Value SaveDocument(const Napi::CallbackInfo& info) {
   BufferWriter writer;
   writer.fileWrite.version = 1;
   writer.fileWrite.WriteBlock = WriteBlockCallback;
+
+  // Flush any cached dirty pages so their edits are written into the
+  // content streams before we serialise the document.
+  if (!FlushAndCloseCachedPages(handle)) {
+    Napi::Error::New(env,
+      "saveDocument: FPDFPage_GenerateContent failed for a dirty page")
+      .ThrowAsJavaScriptException();
+    return env.Undefined();
+  }
 
   FPDF_BOOL ok = FPDF_SaveAsCopy(doc, &writer.fileWrite, 0);
   if (!ok) {

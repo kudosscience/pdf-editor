@@ -51,7 +51,8 @@ Napi::Value RenderPage(const Napi::CallbackInfo& info) {
   }
 
   // ── Load page ───────────────────────────────────────────────────
-  FPDF_PAGE page = FPDF_LoadPage(doc, pageIndex);
+  bool fromCache = false;
+  FPDF_PAGE page = AcquirePage(handle, doc, pageIndex, fromCache);
   if (!page) {
     Napi::Error::New(env,
       "renderPage: failed to load page " + std::to_string(pageIndex)
@@ -68,7 +69,7 @@ Napi::Value RenderPage(const Napi::CallbackInfo& info) {
   int height = static_cast<int>(pageHeightPt * scale + 0.5);
 
   if (width <= 0 || height <= 0) {
-    FPDF_ClosePage(page);
+    ReleasePage(handle, pageIndex, page, fromCache);
     Napi::Error::New(env, "renderPage: resulting bitmap size is zero")
       .ThrowAsJavaScriptException();
     return env.Undefined();
@@ -78,7 +79,7 @@ Napi::Value RenderPage(const Napi::CallbackInfo& info) {
   // Format 4 = FPDFBitmap_BGRA (Blue-Green-Red-Alpha, 4 bytes/pixel)
   FPDF_BITMAP bitmap = FPDFBitmap_Create(width, height, /*alpha=*/1);
   if (!bitmap) {
-    FPDF_ClosePage(page);
+    ReleasePage(handle, pageIndex, page, fromCache);
     Napi::Error::New(env, "renderPage: FPDFBitmap_Create failed")
       .ThrowAsJavaScriptException();
     return env.Undefined();
@@ -125,7 +126,7 @@ Napi::Value RenderPage(const Napi::CallbackInfo& info) {
 
   // ── Cleanup PDFium resources ────────────────────────────────────
   FPDFBitmap_Destroy(bitmap);
-  FPDF_ClosePage(page);
+  ReleasePage(handle, pageIndex, page, fromCache);
 
   // ── Build result object ─────────────────────────────────────────
   Napi::Object result = Napi::Object::New(env);
